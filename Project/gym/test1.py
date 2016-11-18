@@ -131,8 +131,13 @@ class LunarLander(gym.Env):
         print (len(action))
         return action
 
-    # Succ
-    
+    # Succ() and Reward() combined together
+    def _Succ(self, action):
+        s, r, done, info = env.step(action)
+        return s
+
+    # Reward
+    def _getReward(self, s)
 
 
     def _seed(self, seed=None):
@@ -399,9 +404,13 @@ class LunarLander(gym.Env):
 class LunarLanderContinuous(LunarLander):
     continuous = True
 
-# def limitBreadthFirstSearchwithEval(env, s):
+def limitBreadthFirstSearchwithEval(env, s):
 
-#     def recurse()
+    def recurse(env, s):
+        # base case
+        if env._isWin() or env._isLose:
+            return 
+
 
 
 

@@ -371,7 +371,7 @@ class LunarLanderContinuous(LunarLander):
 
 
 
-def heuristic(env, s):
+def heuristic(env, s, kpangle, kdangle, kppos, kdpos):
     # s is the state information in which: 
     # s[0] is horizontal coordiante
     # s[1] is vertical coordinate
@@ -401,11 +401,11 @@ def heuristic(env, s):
     hover_targ = 0.55*np.abs(s[0])           # target y should be proporional to horizontal offset
 
     # PID controller: s[4] angle, s[5] angularSpeed
-    angle_todo = (angle_targ - s[4])*0.5 - (s[5])*1.0
+    angle_todo = (angle_targ - s[4])*kpangle - (s[5])*kdangle
     #print("angle_targ=%0.2f, angle_todo=%0.2f" % (angle_targ, angle_todo))
 
     # PID controller: s[1] vertical coordinate s[3] vertical speed
-    hover_todo = (hover_targ - s[1])*0.5 - (s[3])*0.5
+    hover_todo = (hover_targ - s[1])*kppos - (s[3])*kdpos
     #print("hover_targ=%0.2f, hover_todo=%0.2f" % (hover_targ, hover_todo))
 
 
@@ -441,25 +441,50 @@ if __name__=="__main__":
     steps = 0
     iteration = 0.0
     totalScore = 0.0
+    kpangle = 0.0
+    kdangle = 0.0 
+    kppos = 0.0
+    kdpos =0.0
     while True:
-        a = heuristic(env, s)
+        a = heuristic(env, s, float(kpangle)/10.0, float(kdangle)/10.0, float(kppos)/10.0, float(kdpos)/10.0)
         s, r, done, info = env.step(a)
         env.render()
         total_reward += r
-        if steps % 20 == 0 or done:
-            print(["{:+0.2f}".format(x) for x in s])
-            print("step {} total_reward {:+0.2f}".format(steps, total_reward))
+        # if steps % 20 == 0 or done:
+        #     print(["{:+0.2f}".format(x) for x in s])
+        #     print("step {} total_reward {:+0.2f}".format(steps, total_reward))
         steps += 1
         if done: 
-            print (('Iteration %d is finished\n') %(iteration+1))
+            # print (('Iteration %d is finished\n') %(iteration+1))
             s = env.reset()
             totalScore += total_reward
             total_reward = 0
             steps = 0
             iteration += 1
-        if iteration == 20:
-            print ('The average reward after %d for oracle is %.2f' %(iteration, (totalScore/iteration)))
-            break
+        if iteration == 3:
+            # print ('The average reward after %d for oracle is %.2f' %(iteration, (totalScore/iteration)))
+            # print (float(kpangle)/10.0, float(kdangle)/10.0, float(kppos)/10.0, float(kdpos)/10.0)
+            print (totalScore/iteration)
+            if kdpos < 11:
+                kdpos += 2
+            else:
+                kdpos = 0
+                kppos += 2
+                if kppos > 11:
+                    kppos = 0
+                    kdangle += 2
+                    if kdangle > 11:
+                        kdangle = 0
+                        kpangle += 2
+                        if kpangle == 12:
+                            break
+            # env = LunarLanderContinuous()
+            # s = env.reset()
+            total_reward = 0
+            steps = 0
+            iteration = 0.0
+            totalScore = 0.0
+
 
 
 # if __name__=="__main__":
@@ -473,7 +498,7 @@ if __name__=="__main__":
 #     iteration = 10;
 #     while True:
 #         # a is a acton from heuristic
-#         a = heuristic(env, s)
+#         a = heuristic(env, s, learnCycle)
 #         # print ('action')
 #         # print (a)
 #         # env.step(a) implement action a and render the environment
