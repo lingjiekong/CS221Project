@@ -395,6 +395,7 @@ def heuristic(env, s):
     # Heuristic for:
     # 1. Testing. 
     # 2. Demonstration rollout.
+    print (s*100)
     angle_targ = s[0]*0.5 + s[2]*1.0         # angle should point towards center (s[0] is horizontal coordinate, s[2] hor speed)
     if angle_targ >  0.4: angle_targ =  0.4  # more than 0.4 radians (22 degrees) is bad
     if angle_targ < -0.4: angle_targ = -0.4
@@ -433,55 +434,55 @@ def heuristic(env, s):
         elif angle_todo > +0.05: a = 1
     return a
 
-if __name__=="__main__":
-    #env = LunarLander()
-    env = LunarLanderContinuous()
-    s = env.reset()
-    total_reward = 0
-    steps = 0
-    iteration = 0.0
-    totalScore = 0.0
-    while True:
-        a = heuristic(env, s)
-        s, r, done, info = env.step(a)
-        env.render()
-        total_reward += r
-        if steps % 20 == 0 or done:
-            print(["{:+0.2f}".format(x) for x in s])
-            print("step {} total_reward {:+0.2f}".format(steps, total_reward))
-        steps += 1
-        if done: 
-            print (('Iteration %d is finished\n') %(iteration+1))
-            s = env.reset()
-            totalScore += total_reward
-            total_reward = 0
-            steps = 0
-            iteration += 1
-        if iteration == 20:
-            print ('The average reward after %d for oracle is %.2f' %(iteration, (totalScore/iteration)))
-            break
-
-
 # if __name__=="__main__":
 #     #env = LunarLander()
-#     # LunarLanderContinuous call LunarLander class and set the continuous = true to keep runing the game
 #     env = LunarLanderContinuous()
-#     # s is the state of the game
 #     s = env.reset()
 #     total_reward = 0
 #     steps = 0
-#     iteration = 10;
+#     iteration = 0.0
+#     totalScore = 0.0
 #     while True:
-#         # a is a acton from heuristic
 #         a = heuristic(env, s)
-#         # print ('action')
-#         # print (a)
-#         # env.step(a) implement action a and render the environment
 #         s, r, done, info = env.step(a)
 #         env.render()
 #         total_reward += r
-#         # if steps % 20 == 0 or done:
-#         #     print(["{:+0.2f}".format(x) for x in s])
-#         #     print("step {} total_reward {:+0.2f}".format(steps, total_reward))
+#         if steps % 20 == 0 or done:
+#             print(["{:+0.2f}".format(x) for x in s])
+#             print("step {} total_reward {:+0.2f}".format(steps, total_reward))
 #         steps += 1
-#         if done: break
+#         if done: 
+#             print (('Iteration %d is finished\n') %(iteration+1))
+#             s = env.reset()
+#             totalScore += total_reward
+#             total_reward = 0
+#             steps = 0
+#             iteration += 1
+#         if iteration == 20:
+#             print ('The average reward after %d for oracle is %.2f' %(iteration, (totalScore/iteration)))
+#             break
+
+
+if __name__=="__main__":
+    #env = LunarLander()
+    # LunarLanderContinuous call LunarLander class and set the continuous = true to keep runing the game
+    env = LunarLanderContinuous()
+    # s is the state of the game
+    s = env.reset()
+    total_reward = 0
+    steps = 0
+    iteration = 10;
+    while True:
+        # a is a acton from heuristic
+        a = heuristic(env, s)
+        # print ('action')
+        # print (a)
+        # env.step(a) implement action a and render the environment
+        s, r, done, info = env.step(a)
+        env.render()
+        total_reward += r
+        # if steps % 20 == 0 or done:
+        #     print(["{:+0.2f}".format(x) for x in s])
+        #     print("step {} total_reward {:+0.2f}".format(steps, total_reward))
+        steps += 1
+        if done: break

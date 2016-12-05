@@ -78,8 +78,8 @@ class LunarLander(gym.Env):
 
     continuous = False
 
-
     def __init__(self):
+
 
         self._seed()
         self.viewer = None
@@ -104,41 +104,6 @@ class LunarLander(gym.Env):
             self.action_space = spaces.Discrete(4)
 
         self._reset()
-
-
-
-
-    # modify the code to become a search problem
-    # isEnd()
-    def _isWin(self):
-        if not self.lander.awake:
-            return True
-        else:
-            return False
-
-    def _isLose(self):
-        if self.game_over or abs((self.lander.position.x - VIEWPORT_W/SCALE/2) / (VIEWPORT_W/SCALE/2)) >= 1.0:
-            return True
-        else: 
-            return False
-
-    # Actions()
-    def _legalAction(self):
-        action = []
-        for eachLeftRightThrottle in range(-10,10+1): # will normalize to 1
-            for eachEngine in range(0,10+1):
-                action.append((float(eachLeftRightThrottle)/10.0, float(eachEngine)/10.0))
-        print (len(action))
-        return action
-
-    # Succ() and Reward() combined together
-    def _Succ(self, action):
-        s, r, done, info = env.step(action)
-        return s
-
-    # Reward
-    def _getReward(self, s)
-
 
     def _seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -404,12 +369,6 @@ class LunarLander(gym.Env):
 class LunarLanderContinuous(LunarLander):
     continuous = True
 
-def limitBreadthFirstSearchwithEval(env, s):
-
-    def recurse(env, s):
-        # base case
-        if env._isWin() or env._isLose:
-            return 
 
 
 def heuristic(env, s):
@@ -430,6 +389,7 @@ def heuristic(env, s):
     # a[1] has a range between -1 and 1  
         # when it is -1, right throttle is on and push to rotate CCW
         # when it is 1, left throttle is on and push to rotate CW
+
 
 
     # Heuristic for:
@@ -466,15 +426,12 @@ def heuristic(env, s):
     if env.continuous:
         a = np.array( [hover_todo*20 - 1, -angle_todo*20] )
         a = np.clip(a, -1, +1)
-        print (a)
     else:
         a = 0
         if hover_todo > np.abs(angle_todo) and hover_todo > 0.05: a = 2
         elif angle_todo < -0.05: a = 3
         elif angle_todo > +0.05: a = 1
     return a
-
-
 
 # if __name__=="__main__":
 #     #env = LunarLander()
@@ -512,22 +469,19 @@ if __name__=="__main__":
     # s is the state of the game
     s = env.reset()
     total_reward = 0
-    steps = 0
-    iteration = 10;
-    while True:
+    runCount = 0
+    while runCount < 300:
         # a is a acton from heuristic
         a = heuristic(env, s)
-        print ('action')
-        # print (a)
-        # env.step(a) implement action a and render the environment
         s, r, done, info = env.step(a)
         env.render()
         total_reward += r
-        # if steps % 20 == 0 or done:
-        #     print(["{:+0.2f}".format(x) for x in s])
-        #     print("step {} total_reward {:+0.2f}".format(steps, total_reward))
-        steps += 1
+        if done:
+            # env = LunarLanderContinuous()
+            # s is the state of the game
+            s = env.reset()
+            print (total_reward)
+            total_reward = 0
+            runCount += 1 
 
-        if env._isWin() or env._isLose(): 
-            env._legalAction()
-            break
+
