@@ -587,7 +587,7 @@ if __name__=="__main__":
     consecutiveNoLearningTrials = 0
     trainingCount = 0
     updateCount = 0
-    while(trainingCount < 1500):
+    while(trainingCount < 400):
     # while(consecutiveNoLearningTrials < NO_LEARNING_THRESHOLD):
         # find what is the best action to take
         maxActionList = list()
@@ -606,8 +606,8 @@ if __name__=="__main__":
                 maxActionList.append(a)
             actionValue = 0
         maxAction = random.choice(maxActionList)
-        print ('maxActionList')
-        print (maxActionList)
+        # print ('maxActionList')
+        # print (maxActionList)
 
         # get real action from the mapping 
         realAction = np.array(actionDict[maxAction])
@@ -699,8 +699,8 @@ if __name__=="__main__":
                 # print (updateValue)
                 # print ('value')
                 # print (value)
-                print ('err')
-                print (err)
+                # print ('err')
+                # print (err)
 
                 value = updateValue
 
@@ -710,13 +710,13 @@ if __name__=="__main__":
             else:
                 consecutiveNoLearningTrials = 0
             trainingCount += 1
-            print ('trainingCount is')
-            print (trainingCount)
-            print ('updateCount is')
-            print (updateCount)
-            print ('reward')
+            # print ('trainingCount is')
+            # print (trainingCount)
+            # print ('updateCount is')
+            # print (updateCount)
+            # print ('reward')
             print (reward[newStateMap])
-            print ('')
+            # print ('')
             # start a new episole
             env = LunarLanderContinuous()
             state = env.reset()
