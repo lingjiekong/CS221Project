@@ -369,6 +369,8 @@ class LunarLander(gym.Env):
 
         return self.viewer.render(return_rgb_array = mode=='rgb_array')
 
+    #########################################################################
+    # start of my code and above the lunarlander API
     def getState(self, s):
         # s is the state information in which: 
         # s[0] is horizontal coordiante
@@ -380,7 +382,8 @@ class LunarLander(gym.Env):
         # s[6] is right leg contact (1) and not contact is 0
         # s[7] is left leg contact (1) and not contact is 0
         state = 0
-        totalState = 3*3*3*3*3*3+1 # 3 x / 3 xdot / 3 y / 3 ydot / 3 theta / 3 thetadot / 1 succeed / 1 fail and 0 is count as a state
+        # 3 x / 3 xdot / 3 y / 3 ydot / 3 theta / 3 thetadot / 1 succeed / 1 fail and 0 is count as a state
+        totalState = 3*3*3*3*3*3+1 
         # mapping the state information
         if (self.game_over or abs(s[0]) >= 1.0):
             state = totalState  # fail the landing 730
@@ -440,100 +443,6 @@ class LunarLander(gym.Env):
 
 class LunarLanderContinuous(LunarLander):
     continuous = True
-
-
-
-def heuristic(env, s):
-    # s is the state information in which: 
-    # s[0] is horizontal coordiante - 
-    # s[1] is vertical coordinate
-    # s[2] is horizontal speed -
-    # s[3] is vertical speed
-    # s[4] is angle
-    # s[5] is angular speed
-    # s[6] is right leg contact (1) and not contact is 0
-    # s[7] is left leg contact (1) and not contact is 0
-    # a is action in which: (a is a R2 vector)
-    # a[0] has a range between -1 and 1 
-        # when it is less than 0, the vertical throttle is off
-        # when it is bigger than 0, the vertical throttle is on and the bigger the value, the bigger vertical throttle, you will have
-    # a[1] has a range between -1 and 1  
-        # when it is -1, right throttle is on and push to rotate CCW
-        # when it is 1, left throttle is on and push to rotate CW
-
-
-    # Heuristic for:
-    # 1. Testing. 
-    # 2. Demonstration rollout.
-    angle_targ = s[0]*0.5 + s[2]*1.0         # angle should point towards center (s[0] is horizontal coordinate, s[2] hor speed)
-    if angle_targ >  0.4: angle_targ =  0.4  # more than 0.4 radians (22 degrees) is bad
-    if angle_targ < -0.4: angle_targ = -0.4
-    hover_targ = 0.55*np.abs(s[1])           # target y should be proporional to horizontal offset
-
-    # PID controller: s[4] angle, s[5] angularSpeed
-    angle_todo = (angle_targ - s[4])*0.5 - (s[5])*1.0
-    #print("angle_targ=%0.2f, angle_todo=%0.2f" % (angle_targ, angle_todo))
-
-    # PID controller: s[1] vertical coordinate s[3] vertical speed
-    hover_todo = (hover_targ - s[1])*0.5 - (s[3])*0.5
-    # print("hover_targ=%0.2f, hover_todo=%0.2f" % (hover_targ, hover_todo))
-    # print ('angle_todo')
-    # print (angle_todo)
-    # print ('hover_todo')
-    # print (hover_todo)
-    # print ('')
-
-    # use for submit the original proposal: THIS IS NOT THE COREECT ONE TO USE
-    #     # PID controller: s[4] angle, s[5] angularSpeed
-    # angle_todo = (angle_targ - s[4])*0.5 - (s[5])*0.5
-    # #print("angle_targ=%0.2f, angle_todo=%0.2f" % (angle_targ, angle_todo))
-
-    # # PID controller: s[1] vertical coordinate s[3] vertical speed
-    # hover_todo = (hover_targ - s[1])*0.1 - (s[3])*0.1
-    # #print("hover_targ=%0.2f, hover_todo=%0.2f" % (hover_targ, hover_todo))
-
-    if s[6] or s[7]: # legs have contact
-        angle_todo = 0
-        hover_todo = -(s[3])*0.5  # override to reduce fall speed, that's all we need after contact
-
-    if env.continuous:
-        a = np.array( [hover_todo*20 - 1, -angle_todo*20] )
-        a = np.clip(a, -1, +1)
-    # else:
-    #     a = 0
-    #     if hover_todo > np.abs(angle_todo) and hover_todo > 0.05: a = 2
-    #     elif angle_todo < -0.05: a = 3
-    #     elif angle_todo > +0.05: a = 1
-    return a
-
-
-# if __name__=="__main__":
-#     #env = LunarLander()
-#     env = LunarLanderContinuous()
-#     s = env.reset()
-#     total_reward = 0
-#     steps = 0
-#     iteration = 0.0
-#     totalScore = 0.0
-#     while True:
-#         a = heuristic(env, s)
-#         s, r, done, info = env.step(a)
-#         env.render()
-#         total_reward += r
-#         if steps % 20 == 0 or done:
-#             print(["{:+0.2f}".format(x) for x in s])
-#             print("step {} total_reward {:+0.2f}".format(steps, total_reward))
-#         steps += 1
-#         if done: 
-#             print (('Iteration %d is finished\n') %(iteration+1))
-#             s = env.reset()
-#             totalScore += total_reward
-#             total_reward = 0
-#             steps = 0
-#             iteration += 1
-#         if iteration == 20:
-#             print ('The average reward after %d for oracle is %.2f' %(iteration, (totalScore/iteration)))
-#             break
 
 if __name__=="__main__":
     #########################################################################
@@ -606,21 +515,14 @@ if __name__=="__main__":
                 maxActionList.append(a)
             actionValue = 0
         maxAction = random.choice(maxActionList)
-        # print ('maxActionList')
-        # print (maxActionList)
 
         # get real action from the mapping 
         realAction = np.array(actionDict[maxAction])
-        # print ('real action')
-        # print (realAction)
-
 
         # get the newS/reward/done by simulating the dynamics
         newState, r, done, info = env.step(realAction)
         # env.render()
         newStateMap = env.getState(newState)
-        # print ('reward')
-        # print (r)
 
         # count for transition probablity 
         if tranCount[maxAction] == 0: 
@@ -633,25 +535,6 @@ if __name__=="__main__":
         else: # 
             tranCount[maxAction][stateMap][newStateMap] += 1
 
-
-        # # count for reward 
-        # angle_targ = newState[0]*0.5 + newState[2]*1.0
-        # hover_targ = 0.55*np.abs(newState[0])           # target y should be proporional to horizontal offset
-        # angle_todo = (angle_targ - newState[4])*0.5 - (newState[5])*1.0
-        # hover_todo = (hover_targ - newState[1])*0.5 - (newState[3])*0.5
-        # if newState[6] or newState[7]: # legs have contact
-        #     angle_todo = 0
-        #     hover_todo = -(newState[3])*0.5  # override to reduce fall speed, that's all we need after contact
-
-        # a = np.array( [hover_todo*20 - 1, -angle_todo*20] )
-        # hover_todo = a[0]
-        # angle_todo = a[1]
-
-        # rewardCountTime[newStateMap] += 1
-        # if (newStateMap == NUM_STATES or newStateMap == NUM_STATES - 1):
-        #     rewardCountValue[newStateMap] += r
-        # else:
-        #     rewardCountValue[newStateMap] += -abs(angle_todo)-abs(hover_todo)
         # count for reward 
         rewardCountTime[newStateMap] += 1
         if (newStateMap == NUM_STATES or newStateMap == NUM_STATES - 1):
@@ -683,10 +566,6 @@ if __name__=="__main__":
                 for i in range(0, NUM_STATES + 1):
                     vOptMax = -float('inf')
                     for a in range(0,LEFT_RIGHT_ACTION*BOTTOM_ACTION):
-                        # print ('vOptMax')
-                        # print (vOptMax)
-                        # print ('tranProb')
-                        # print (tranProb[a][i])
                         for j in list(tranProb[a][i]):
                             vOpt += tranProb[a][i][j]*value[j]
                         if vOpt > vOptMax:
@@ -695,13 +574,6 @@ if __name__=="__main__":
                     updateValue[i] = reward[i]+GAMMA*vOptMax
                 updateCount += 1
                 err = max(abs(updateValue[i] - value[i]) for i in list(value))
-                # print ('updateValue')
-                # print (updateValue)
-                # print ('value')
-                # print (value)
-                # print ('err')
-                # print (err)
-
                 value = updateValue
 
             # check convergence to stop training
@@ -710,22 +582,12 @@ if __name__=="__main__":
             else:
                 consecutiveNoLearningTrials = 0
             trainingCount += 1
-            # print ('trainingCount is')
-            # print (trainingCount)
-            # print ('updateCount is')
-            # print (updateCount)
-            # print ('reward')
             print (reward[newStateMap])
-            # print ('')
-            # start a new episole
             env = LunarLanderContinuous()
             state = env.reset()
-        
 
-
-
-    #env = LunarLander()
-    # LunarLanderContinuous call LunarLander class and set the continuous = true to keep runing the game
+    #########################################################################  
+    # Start play the game with the learned T, R, and V
     env = LunarLanderContinuous()
     # s is the state of the game
     s = env.reset()
@@ -734,8 +596,6 @@ if __name__=="__main__":
     iteration = 10;
     # use MDP to play the game
     while True:
-        # a is a acton from heuristic
-        # a = heuristic(env, s)
         for a in range(0,LEFT_RIGHT_ACTION*BOTTOM_ACTION):
             for i in list(tranProb[a][stateMap]):
                 actionValue += tranProb[a][stateMap][i] * value[i]
@@ -745,16 +605,10 @@ if __name__=="__main__":
 
         # get real action from the mapping 
         realAction = np.array(actionDict[maxAction])
-
-        # print ('action')
-        # print (a)
         # env.step(a) implement action a and render the environment
         s, r, done, info = env.step(realAction)
         env.render()
         total_reward += r
-        # if steps % 20 == 0 or done:
-        #     print(["{:+0.2f}".format(x) for x in s])
-        #     print("step {} total_reward {:+0.2f}".format(steps, total_reward))
         steps += 1
         if done: break
     print ('value')
@@ -769,35 +623,3 @@ if __name__=="__main__":
                     dummyCount += 1
     print ('dummyCount')
     print (dummyCount)
-
-
-
-
-
-# if __name__=="__main__":
-#     #env = LunarLander()
-#     # LunarLanderContinuous call LunarLander class and set the continuous = true to keep runing the game
-#     env = LunarLanderContinuous()
-#     # s is the state of the game
-#     s = env.reset()
-#     total_reward = 0
-#     steps = 0
-#     iteration = 10;
-
-
-#     while True:
-        
-#         # a is a acton from heuristic
-#         a = heuristic(env, s)
-#         # print ('action')
-#         # print (a)
-#         # env.step(a) implement action a and render the environment
-#         s, r, done, info = env.step(a)
-#         (env.getState(s))
-#         env.render()
-#         total_reward += r
-#         # if steps % 20 == 0 or done:
-#         #     print(["{:+0.2f}".format(x) for x in s])
-#         #     print("step {} total_reward {:+0.2f}".format(steps, total_reward))
-#         steps += 1
-#         if done: break

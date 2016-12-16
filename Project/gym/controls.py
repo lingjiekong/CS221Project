@@ -17,36 +17,60 @@ horSpeedWeight = 1.
 angleThresh = 0.4
 targetVertWeight = 0.2
 angleMax = 0.05
-newVertWeight = 0.5
-newAngleWeight = 0.5
-newAngularSpeedWeight = 1.
+
+# controller gain
+Kp_Vert = 0.5 # propotional gain for vertical position
+Kd_Vert = 1 # derivative gain for vertical velocity
+Kp_ang = 0.5 # propotional gain for angular orientation
+Kd_ang = 1 # derivative gain for angular velocity
+
+
+#######################################################################
+# algorithm: controller heuristic
 def controlsCalc(environ, state):
-    # angle should be limited by horizontal speed and position
-    targetAngle = state[0]*horPosWeight + state[2]*horSpeedWeight
-    if targetAngle >  angleThresh: 
-        targetAngle =  angleThresh
+    # get state information
+    horPos = state[0]
+    verPos = state[1]
+    horVel = state[2]
+    verVel = state[3]
+    angOri = state[4]
+    angVel = state[5]
+    lfLeg = state[6]
+    RgLef = state[7]
+
+    # target angle: should be limited by horizontal speed and position 
+    targetAngle = horVel*horSpeedWeight + horPos*horPosWeight
     if targetAngle < -angleThresh: 
         targetAngle = -angleThresh
+    elif targetAngle >  angleThresh: 
+        targetAngle =  angleThresh
+    
+    # target vertical position: should be 0.2 of current position
+    targetVertPos = targetVertWeight*np.abs(verPos) 
 
-    targetVertPos = np.abs(state[1])*targetVertWeight
+    # PD controller for angle and vertical command
+    newAngle = (targetAngle - angOri)*Kp_ang + (0 - angVel)*Kd_ang
+    newVert = (targetVertPos - verPos)*Kp_Vert + (0 - verVel)*Kd_Vert
 
-    newAngle = (targetAngle - state[4])*newAngleWeight - (state[5])*newAngularSpeedWeight
-    newVert = (targetVertPos - state[1])*newVertWeight - (state[3])*newVertWeight
-
-    if state[6] or state[7]:
+    # leg contact the ground
+    if lfLeg or RgLef:
         newAngle = 0
-        newVert = -(state[3])*newVertWeight
+        newVert = -(verVel)*Kd_Vert
 
+    # band band control
     action = g_noEngineFired
     if newAngle > angleMax: 
         action = g_leftEngineFired
-    elif newVert > np.abs(newAngle) and newVert > 0.05: 
+    elif newVert > angleMax and newVert > np.abs(newAngle): 
         action = g_bottomEngineFired
     elif newAngle < -angleMax: 
         action = g_rightEngineFired
 
     return action
 
+
+#######################################################################
+# model
 if __name__=="__main__":
     iter = 0
     totalRewardsCombined = 0
