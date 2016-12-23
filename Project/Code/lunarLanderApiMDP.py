@@ -372,9 +372,11 @@ class LunarLander(gym.Env):
         return self.viewer.render(return_rgb_array = mode=='rgb_array')
 
     #########################################################################
-    # Start of MDP approach
-    # 'Lingjie Kong'
-    # 'December 16th'
+    '''
+    Created: Nov 18th, 2016
+    author: Lingjie Kong
+    Revision: X1
+    '''
     def getState(self, s):
         # s is the state information in which: 
         # s[0] is horizontal coordiante

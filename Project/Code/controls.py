@@ -1,3 +1,8 @@
+'''
+Created: Nov 18th, 2016
+author: Lingjie Kong
+Revision: X1
+'''
 import numpy as np
 import lunarLanderApiControl
 from lunarLanderApiControl import Rocket
@@ -14,15 +19,16 @@ g_rightEngineFired = 3
 # 4: angle, 5: angSpeed, 6: legLeft, 7: legRight
 horPosWeight = 0.5
 horSpeedWeight = 1.
-angleThresh = 0.4
 targetVertWeight = 0.2
+
+angleThresh = 0.4
 angleMax = 0.05
 
 # controller gain
-Kp_Vert = 0.5 # propotional gain for vertical position
-Kd_Vert = 1 # derivative gain for vertical velocity
-Kp_ang = 0.5 # propotional gain for angular orientation
-Kd_ang = 1 # derivative gain for angular velocity
+Kp_Vert = 0 # propotional gain for vertical position
+Kd_Vert = 0 # derivative gain for vertical velocity
+Kp_ang = 0 # propotional gain for angular orientation
+Kd_ang = 0 # derivative gain for angular velocity
 
 
 #######################################################################
@@ -72,6 +78,45 @@ def controlsCalc(environ, state):
 #######################################################################
 # model
 if __name__=="__main__":
+
+    # ask user for controller gain input
+    while True:
+        try:
+            Kp_Vert = float(input("propotional gain for vertical position (best is 1): "))
+        except ValueError:
+            print("invalid propotional gain.")
+            continue
+        else:
+            break
+
+    while True:
+        try:
+            Kd_Vert = float(input("derivative gain for vertical velocity (best is 1): "))
+        except ValueError:
+            print("invalid derivative gain.")
+            continue
+        else:
+            break
+
+    while True:
+        try:
+            Kp_ang = float(input("propotional gain for angular orientation (best is 1): "))
+        except ValueError:
+            print("invalid propotional gain.")
+            continue
+        else:
+            break
+
+    while True:
+        try:
+            Kd_ang = float(input("derivative gain for angular velocity (best is 1): "))
+        except ValueError:
+            print("invalid derivative gain.")
+            continue
+        else:
+            break
+
+    # start running code
     iter = 0
     totalRewardsCombined = 0
     while iter != 400:

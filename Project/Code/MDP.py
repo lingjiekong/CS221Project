@@ -1,3 +1,8 @@
+'''
+Created: Nov 18th, 2016
+author: Lingjie Kong
+Revision: X1
+'''
 import numpy as np
 import collections # use for sparse vector dot product
 import random # use for generate random value initally
